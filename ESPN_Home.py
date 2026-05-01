@@ -8,7 +8,10 @@ from selenium.webdriver.common.keys import Keys
 import time
 import sys
 
+import ESPN_Parameters
 import ESPN_WriteResult
+
+test_url = ESPN_Parameters.espn_test_parameters['TEST_URL']
 
 def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
 
@@ -20,9 +23,9 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
 
         home_transaction_start = time.time()
         # Navigate to ESPN
-        print("Navigate to ESPN")
-        debug_log.write("Navigate to http://www.espn.com\n")
-        driver.get("http://www.espn.com")
+        print("Navigate to ", str(test_url))
+        debug_log.write("Navigate to http://www.espn.com/")
+        driver.get(test_url)
 
         # Wait for the page to load (wait for body element)
         print("Wait for the page to load (wait for body element)")
