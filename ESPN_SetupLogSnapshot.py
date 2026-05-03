@@ -12,12 +12,17 @@ test_name = ESPN_Parameters.espn_test_parameters['TEST_NAME']
 def init():
     datetime_in_us_pacific = datetime.now(pytz.timezone('America/Los_Angeles'))
 
-    # Path for snapshot on errors
-    error_snapshot_path = test_folder_path + "/" + test_name + "/Error_Snapshots/"
-    print("Path for error snapshots has been set")
-
-    # Path for debug log files
-    debug_log_path = test_folder_path + "/" + test_name + "/Debug/"
+    # Path for snapshot on errors and path for debug log files
+    if "var/lib/jenkins/workspace" in os.getcwd():
+        print("We are running script from Jenkins server - path needs to be changed")
+        error_snapshot_path = os.getcwd() + "/" + test_name + "/Error_Snapshots/"
+        debug_log_path = os.getcwd() + "/" + test_name + "/Debug/"
+        print("Path for error snapshots and debug logs has been set")
+    else:
+        print("We are running script from development VM")
+        error_snapshot_path = test_folder_path + "/" + test_name + "/Error_Snapshots/"
+        debug_log_path = test_folder_path + "/" + test_name + "/Debug/"
+        print("Path for error snapshots and debug logs has been set")
 
     # Capture current date to set to label all log files with script runtime/timestamp information
     # file_timestamp = time.strftime("%H%M_%m%d%Y")
