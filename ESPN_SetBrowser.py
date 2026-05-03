@@ -18,7 +18,7 @@ def init(browser_type, debug_log):
 
         # Configure Chrome options
         chrome_options = Options()
-        # chrome_options.add_argument("--headless")  # Run in headless mode (no browser window)
+        chrome_options.add_argument("--headless")  # Run in headless mode (no browser window)
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
@@ -41,7 +41,7 @@ def init(browser_type, debug_log):
 
         # Configure FireFox options
         firefox_options = webdriver.FirefoxOptions()
-        # firefox_options.add_argument("--headless")
+        firefox_options.add_argument("--headless")
         firefox_options.add_argument("--no-sandbox")
         firefox_options.add_argument("--disable-dev-shm-usage")
         firefox_options.add_argument("--disable-gpu")
@@ -64,7 +64,7 @@ def init(browser_type, debug_log):
 
         # Configure Edge options
         edge_options = Options()
-        # edge_options.add_argument("--headless")  # Run in headless mode (no browser window)
+        edge_options.add_argument("--headless")  # Run in headless mode (no browser window)
         edge_options.add_argument("--no-sandbox")
         edge_options.add_argument("--disable-dev-shm-usage")
         edge_options.add_argument("--disable-gpu")
@@ -83,7 +83,7 @@ def init(browser_type, debug_log):
         debug_log.write("Default driver settings should be set.\n")
         # Configure Chrome options
         chrome_options = Options()
-        # chrome_options.add_argument("--headless")  # Run in headless mode (no browser window)
+        chrome_options.add_argument("--headless")  # Run in headless mode (no browser window)
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
