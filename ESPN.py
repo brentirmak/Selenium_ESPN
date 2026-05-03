@@ -33,9 +33,11 @@ test_name = ESPN_Parameters.espn_test_parameters['TEST_NAME']
 # File to store overall Heartbeat test information locally - also used for DB storing purposes
 results_log_path = test_folder_path + "/" + test_name + "/" + test_name + ".txt"
 
-print("************************************")
-print(os.getcwd())
-print("************************************")
+print("*****************************************")
+print("Current working directory (Jenkins): ", os.getcwd())
+print("*****************************************")
+print("Test Folder Path (per script): ", test_folder_path + "/" + test_name)
+print("*****************************************")
 
 # Set up argument parser
 parser = argparse.ArgumentParser()
