@@ -12,7 +12,7 @@ espn_results_file = ESPN_Parameters.espn_test_parameters['RESULTS_FILE']
 test_folder_path = ESPN_Parameters.espn_test_parameters['TEST_FOLDER_PATH']
 test_name = ESPN_Parameters.espn_test_parameters['TEST_NAME']
 
-results_log = test_folder_path + test_name + "/" + espn_results_file
+results_log = test_folder_path + "/" + test_name + "/" + espn_results_file
 
 print(results_log)
 
