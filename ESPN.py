@@ -25,10 +25,7 @@ import ESPN_WriteResult
 debug_file_prefix = ESPN_Parameters.espn_test_parameters['DEBUG_FILE_PREFIX']
 test_folder_path = ESPN_Parameters.espn_test_parameters['TEST_FOLDER_PATH']
 test_name = ESPN_Parameters.espn_test_parameters['TEST_NAME']
-
-# Auto-manages driver versions
-#from selenium.webdriver.chrome.service import Service
-#from webdriver_manager.chrome import ChromeDriverManager
+run_type = "manual"
 
 print("*****************************************")
 print("Current working directory (Jenkins): ", os.getcwd())
@@ -40,11 +37,12 @@ print("*****************************************")
 if "var/lib/jenkins/workspace" in os.getcwd():
     print("We are running script from Jenkins server - path needs to be changed")
     results_log_path = os.getcwd() + "/" + test_name + ".txt"
-    print("Path for results file has been set")
+    run_type = "jenkins"
+    print("Path for results file has been set, run type set to jenkins")
 else:
     print("We are running script from development VM")
     results_log_path = test_folder_path + "/" + test_name + "/" + test_name + ".txt"
-    print("Path for results file has been set")
+    print("Path for results file has been set, run type set to manual")
 
 # Set up argument parser
 parser = argparse.ArgumentParser()

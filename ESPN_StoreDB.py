@@ -13,16 +13,18 @@ import ESPN_Parameters
 espn_results_file = ESPN_Parameters.espn_test_parameters['RESULTS_FILE']
 test_folder_path = ESPN_Parameters.espn_test_parameters['TEST_FOLDER_PATH']
 test_name = ESPN_Parameters.espn_test_parameters['TEST_NAME']
+run_type = "manual"
 
 # File to store overall Heartbeat test information locally - also used for DB storing purposes
 if "var/lib/jenkins/workspace" in os.getcwd():
     print("We are running script from Jenkins server - path needs to be changed")
     results_log = os.getcwd() + "/" + test_name + "/" + espn_results_file
-    print("Path for results file has been set")
+    run_type = "jenkins"
+    print("Path for results file has been set, type set to jenkins")
 else:
     print("We are running script from development VM")
     results_log = test_folder_path + "/" + test_name + "/" + espn_results_file
-    print("Path for results file has been set")
+    print("Path for results file has been set, type set to manual")
 
 print("Results log: ", results_log)
 print("Connecting to Credence ...")
@@ -97,9 +99,9 @@ for line in lines:
 print("Inserting results into database ...")
 
 cursor.execute(
-    """INSERT INTO espn_heartbeat(RunTimeStamp, Home, Browser)
-                  values (%s, %s, %s)""",
-    (current_timestamp, ESPN_Home_trx_time, browser_type))
+    """INSERT INTO espn_heartbeat(RunTimeStamp, RunType, Home, Browser)
+                  values (%s, %s, %s, %s)""",
+    (current_timestamp, run_type, ESPN_Home_trx_time, browser_type))
 
 cnx.commit()
 cursor.close()

@@ -8,6 +8,7 @@ import ESPN_Parameters
 debug_file_prefix = ESPN_Parameters.espn_test_parameters['DEBUG_FILE_PREFIX']
 test_folder_path = ESPN_Parameters.espn_test_parameters['TEST_FOLDER_PATH']
 test_name = ESPN_Parameters.espn_test_parameters['TEST_NAME']
+run_type = "manual"
 
 def init():
     datetime_in_us_pacific = datetime.now(pytz.timezone('America/Los_Angeles'))
@@ -17,12 +18,13 @@ def init():
         print("We are running script from Jenkins server - path needs to be changed")
         error_snapshot_path = os.getcwd() + "/" + test_name + "/Error_Snapshots/"
         debug_log_path = os.getcwd() + "/" + test_name + "/Debug/"
-        print("Path for error snapshots and debug logs has been set")
+        run_type = "jenkins"
+        print("Path for error snapshots and debug logs has been set, run type set to jenkins")
     else:
         print("We are running script from development VM")
         error_snapshot_path = test_folder_path + "/" + test_name + "/Error_Snapshots/"
         debug_log_path = test_folder_path + "/" + test_name + "/Debug/"
-        print("Path for error snapshots and debug logs has been set")
+        print("Path for error snapshots and debug logs has been set, run type set to manual")
 
     # Capture current date to set to label all log files with script runtime/timestamp information
     # file_timestamp = time.strftime("%H%M_%m%d%Y")

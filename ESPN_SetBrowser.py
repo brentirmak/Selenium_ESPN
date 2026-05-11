@@ -1,11 +1,3 @@
-#from selenium.webdriver.firefox.service import Service
-#from selenium.webdriver.firefox.options import Options
-#from selenium.webdriver.chrome.service import Service
-#from selenium.webdriver.chrome.options import Options
-#from selenium.webdriver.edge.service import Service
-#from selenium.webdriver.edge.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-
 from selenium import webdriver
 
 def init(browser_type, debug_log):
