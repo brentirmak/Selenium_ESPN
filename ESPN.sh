@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Get directory where script is located
 SCRIPT_DIR=$(dirname "$0")
