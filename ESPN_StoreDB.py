@@ -107,6 +107,9 @@ except Exception as e:
     print("We have hit an exception")
     errors.append(str(e))
 
+    sys.exit(1)  # tells Jenkins: FAILED
+
+'''
 if errors:
     print("Will tell Jenkins about the errors...")
     print(f"ERROR: {errors}")
@@ -115,3 +118,4 @@ else:
     print("Will tell Jenkins everything is fine")
     print("All good!")
     sys.exit(0)  # tells Jenkins: SUCCESS
+'''
