@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 # Get directory where script is located
 SCRIPT_DIR=$(dirname "$0")
@@ -15,8 +14,10 @@ echo "Called from: $CALLED_FROM"
 
 echo "Running the script for the Chrome driver/browser"
 python3 ESPN.py --browser Chrome
+set -e
 echo "Storing the results for the Chrome driver/browser script run"
 python3 ESPN_StoreDB.py
+set +e
 echo "Results have been stored - will remove txt results file"
 rm ESPN.txt
 
@@ -24,16 +25,20 @@ sleep 5
 
 echo "Running the script for the Firefox driver/browser"
 python3 ESPN.py --browser Firefox
+set -e
 echo "Storing the results for the Firefox driver/browser script run"
 python3 ESPN_StoreDB.py
+set +e
 echo "Results have been stored - will remove txt results file"
 rm ESPN.txt
 
 sleep 5
 echo "Running the script for the Edge driver/browser"
 python3 ESPN.py --browser Edge
+set -e
 echo "Storing the results for the Edge driver/browser script run"
 python3 ESPN_StoreDB.py
+set +e
 echo "Results have been stored - will remove txt results file"
 rm ESPN.txt
 
