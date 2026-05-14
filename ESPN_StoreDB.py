@@ -23,7 +23,8 @@ if "var/lib/jenkins/workspace" in os.getcwd():
     print("Path for results file has been set, type set to jenkins")
 else:
     print("We are running script from development VM")
-    results_log = test_folder_path + "/" + test_name + "/" + espn_results_file
+    #results_log = test_folder_path + "/" + test_name + "/" + espn_results_file
+    results_log = os.getcwd() + "/testing/" + espn_results_file
     print("Path for results file has been set, type set to manual")
 
 print("Results log: ", results_log)
@@ -103,11 +104,14 @@ try:
     text_file.close()
 
 except Exception as e:
+    print("We have hit an exception")
     errors.append(str(e))
 
 if errors:
+    print("Will tell Jenkins about the errors...")
     print(f"ERROR: {errors}")
     sys.exit(1)  # tells Jenkins: FAILED
-
-print("All good!")
-sys.exit(0)  # tells Jenkins: SUCCESS
+else:
+    print("Will tell Jenkins everything is fine")
+    print("All good!")
+    sys.exit(0)  # tells Jenkins: SUCCESS
