@@ -44,7 +44,7 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
 
         top_headlines_header = WebDriverWait(driver, 45). \
             until(EC.presence_of_element_located(
-            (By.XPATH, "/html/body/div[5]/section/section/div/section[3]/div[1]/header/h2")))
+            (By.XPATH, "//h2[contains(.,'Top Headlines')]")))
         print(top_headlines_header.text)
         print("Top Headlines header found")
         debug_log.write("Top Headlines header found\n")
@@ -69,7 +69,7 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
 
         espn_logo = WebDriverWait(driver, 45). \
             until(EC.presence_of_element_located(
-            (By.XPATH, "/html/body/div[5]/div[2]/header/div[2]/h2/a")))
+            (By.XPATH, "//a[contains(.,'ESPN')]")))
 
         print("---------------------------")
         #print("Id: ", espn_logo.get_attribute("id"))
@@ -93,7 +93,7 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
 
         top_events_button = WebDriverWait(driver, 45). \
             until(EC.presence_of_element_located(
-            (By.XPATH, "//section/div/div/div/button")))
+            (By.XPATH, "//button[contains(.,'Top Events')]")))
 
         print("---------------------------")
         #print("Id: ", top_events_button.get_attribute("id"))
