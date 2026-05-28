@@ -5,12 +5,22 @@ import time
 import pytz
 from datetime import datetime
 import ESPN_Parameters
+from dotenv import load_dotenv
 
 espn_results_file = ESPN_Parameters.espn_test_parameters['RESULTS_FILE']
 test_folder_path = ESPN_Parameters.espn_test_parameters['TEST_FOLDER_PATH']
 test_name = ESPN_Parameters.espn_test_parameters['TEST_NAME']
 run_type = "manual"
 errors = []
+
+# 1. Load the environment variables from the .env file
+load_dotenv()
+
+# 2. Retrieve the secrets using os.getenv()
+mysql_url = os.getenv("MYSQL_URL")
+mysql_username = os.getenv("MYSQL_USERNAME")
+mysql_password = os.getenv("MYSQL_PASSWORD")
+
 
 # --- Path setup ---
 if "var/lib/jenkins/workspace" in os.getcwd():
@@ -37,9 +47,9 @@ def connect_to_db(config):
         sys.exit(1)  # fail fast, no silent retry masking
 
 config = {
-    'user': 'selenium',
-    'password': 'Selenium#123#',
-    'host': '192.168.239.1',
+    'user': mysql_username,
+    'password': mysql_password,
+    'host': mysql_url,
     'database': 'selenium',
 }
 
