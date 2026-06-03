@@ -174,7 +174,7 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
             debug_log.write("\n")
             print("\nCaptured Error Screenshot: ", home_error_snapshot)
 
-            write_failure_to_log(results_log)
+            write_failure_to_log(results_log, browser_type)
 
             driver.close()
             time.sleep(1)
@@ -217,7 +217,7 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
         debug_log.write("\n")
         print("\nCaptured Error Screenshot: ", home_error_snapshot)
 
-        write_failure_to_log(results_log)
+        write_failure_to_log(results_log, browser_type)
 
         driver.close()
         time.sleep(1)
@@ -230,7 +230,7 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
             quit()
 
 def write_failure_to_log(results_log, browser_type):
-
-    ESPN_WriteResult.init(results_log, browser_type, "ESPN_Home", "Fail", "NULL")
-    ESPN_WriteResult.init(results_log, browser_type, "ESPN_Wrapper", "Fail", "NULL")
-    ESPN_WriteResult.init(results_log, browser_type, "ESPN_Heartbeat", "Fail", "NULL")
+    ESPN_WriteResult.init(results_log, "ESPN_Home", "Fail", "NULL", browser_type)
+    ESPN_WriteResult.init(results_log, "ESPN_NBA", "Fail", "NULL", browser_type)
+    ESPN_WriteResult.init(results_log, "ESPN_Wrapper", "Fail", "NULL", browser_type)
+    ESPN_WriteResult.init(results_log, "ESPN_Heartbeat", "Fail", "NULL", browser_type)

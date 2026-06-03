@@ -66,12 +66,17 @@ try:
         lines = text_file.readlines()
 
     ESPN_Home_trx_time = 'NULL'
+    ESPN_NBA_trx_time = 'NULL'
+
     for line in lines:
         trx_name, trx_status, trx_duration, browser_type = line.split(",")
 
         if trx_name == 'ESPN_Home':
             ESPN_Home_trx_time = trx_duration[:5]
             ESPN_Home_trx_status = trx_status
+        if trx_name == 'ESPN_NBA':
+            ESPN_NBA_trx_time = trx_duration[:5]
+            ESPN_NBA_trx_status = trx_status
         if trx_name == 'ESPN_Wrapper':
             ESPN_Wrapper_trx_status = trx_status
             ESPN_Wrapper_trx_time = 'NULL' if ESPN_Wrapper_trx_status in ('Fail', 'Stop') else trx_duration[:5]
@@ -81,9 +86,9 @@ try:
 
     print("Inserting results into DB...")
     cursor.execute(
-        """INSERT INTO espn_heartbeat(RunTimeStamp, RunType, Home, Browser)
-           VALUES (%s, %s, %s, %s)""",
-        (current_timestamp, run_type, ESPN_Home_trx_time, browser_type)
+        """INSERT INTO espn_heartbeat(RunTimeStamp, RunType, Home, NBA, Browser)
+           VALUES (%s, %s, %s, %s, %s)""",
+        (current_timestamp, run_type, ESPN_Home_trx_time, ESPN_NBA_trx_time, browser_type)
     )
     cnx.commit()
     print("Insert successful")
