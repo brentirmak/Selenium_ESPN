@@ -107,7 +107,7 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
         driver.quit()
 
         try:
-            sys.exit()
+            sys.exit(1)
         except SystemExit:
             print("SystemExit Exception terminated the program!")
             quit()
