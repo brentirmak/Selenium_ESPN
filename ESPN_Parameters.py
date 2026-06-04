@@ -8,10 +8,10 @@ Date        Author      Ticket #        Description
 """
 
 espn_test_parameters = {
-    'TEST_VERSION': 'ESPN',
+    'TEST_VERSION': 'Selenium_ESPN',
     'TEST_FOLDER_PATH': '/home/brent-ubuntu-26-04/SeleniumProjects',
-    'TEST_NAME': 'ESPN',
+    'TEST_NAME': 'Selenium_ESPN',
     'TEST_URL': 'http://www.espn.com/',
-    'RESULTS_FILE': 'ESPN.txt',
+    'RESULTS_FILE': 'Selenium_ESPN.txt',
     'DEBUG_FILE_PREFIX': 'ESPN_Debug_',
     }

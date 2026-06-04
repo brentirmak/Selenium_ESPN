@@ -19,7 +19,7 @@ echo "Storing the results for the Chrome driver/browser script run"
 python3 ESPN_StoreDB.py
 set +e
 echo "Results have been stored - will remove txt results file"
-rm ESPN.txt
+rm Selenium_ESPN.txt
 
 sleep 5
 
@@ -30,7 +30,7 @@ echo "Storing the results for the Firefox driver/browser script run"
 python3 ESPN_StoreDB.py
 set +e
 echo "Results have been stored - will remove txt results file"
-rm ESPN.txt
+rm Selenium_ESPN.txt
 
 sleep 5
 echo "Running the script for the Edge driver/browser"
@@ -40,6 +40,6 @@ echo "Storing the results for the Edge driver/browser script run"
 python3 ESPN_StoreDB.py
 set +e
 echo "Results have been stored - will remove txt results file"
-rm ESPN.txt
+rm Selenium_ESPN.txt
 
 exit
