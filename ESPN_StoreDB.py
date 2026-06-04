@@ -86,7 +86,7 @@ try:
 
     print("Inserting results into DB...")
     cursor.execute(
-        """INSERT INTO espn_heartbeat(RunTimeStamp, RunType, Home, NBA, Browser)
+        """INSERT INTO selenium_espn(RunTimeStamp, RunType, Home, NBA, Browser)
            VALUES (%s, %s, %s, %s, %s)""",
         (current_timestamp, run_type, ESPN_Home_trx_time, ESPN_NBA_trx_time, browser_type)
     )
