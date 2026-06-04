@@ -19,10 +19,18 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
         print("Checking for NBA menu item")
         debug_log.write("Checking for NBA menu item\n")
 
+        driver.execute_script("window.scrollTo(0, 0);")
+
+
+        driver.get("https://www.espn.com/nba/")
+
+        # The following doesn't work in headless mode as the menu isn't available
+        '''
         nba_menu_item = WebDriverWait(driver, 45). \
             until(EC.presence_of_element_located(
             (By.XPATH, "(//span[@class='link-text'][contains(.,'NBA')])[1]")))
         nba_menu_item.click()
+        '''
 
         print("Clicked on NBA menu item")
         debug_log.write("Clicked on NBA menu item\n")
@@ -36,6 +44,30 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
 
         print("NBA logo found")
         debug_log.write("NBA logo found\n")
+
+        print("Scrolling to the bottom of the page")
+        debug_log.write("Scrolling to the bottom of the page\n")
+
+        last_height = driver.execute_script("return document.body.scrollHeight")
+
+        while True:
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+            time.sleep(2)  # wait for content to load
+
+            new_height = driver.execute_script("return document.body.scrollHeight")
+            if new_height == last_height:
+                break  # reached the bottom
+            last_height = new_height
+
+        print("Checking the presence of the Work for ESPN text")
+        debug_log.write("Checking the presence of the Work for ESPN text\n")
+
+        work_for_espn_text = WebDriverWait(driver, 45). \
+            until(EC.presence_of_element_located(
+            (By.XPATH, "(//a[contains(.,'Work for ESPN')])[2]")))
+
+        print("Work for ESPN text found")
+        debug_log.write("Work for ESPN text found\n")
 
         nba_transaction_end = time.time()
 

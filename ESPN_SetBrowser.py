@@ -5,12 +5,12 @@ def init(browser_type, debug_log):
         print("Driver settings for Chrome should be set.")
         debug_log.write("Driver settings for Chrome should be set.\n")
 
-        from selenium.webdriver.chrome.service import Service
         from selenium.webdriver.chrome.options import Options
 
         # Configure Chrome options
         chrome_options = Options()
-        chrome_options.add_argument("--headless")  # Run in headless mode (no browser window)
+        chrome_options.add_argument("--headless=new")
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
@@ -28,12 +28,12 @@ def init(browser_type, debug_log):
         print("Driver settings for Firefox should be set.")
         debug_log.write("Driver settings for Firefox should be set.\n")
 
-        from selenium.webdriver.firefox.service import Service
         from selenium.webdriver.firefox.options import Options
 
         # Configure FireFox options
         firefox_options = webdriver.FirefoxOptions()
-        firefox_options.add_argument("--headless")
+        firefox_options.add_argument("--headless=new")
+        firefox_options.add_argument("--disable-blink-features=AutomationControlled")
         firefox_options.add_argument("--no-sandbox")
         firefox_options.add_argument("--disable-dev-shm-usage")
         firefox_options.add_argument("--disable-gpu")
@@ -51,12 +51,12 @@ def init(browser_type, debug_log):
         print("Driver settings for Edge should be set.")
         debug_log.write("Driver settings for Edge should be set.\n")
 
-        from selenium.webdriver.edge.service import Service
         from selenium.webdriver.edge.options import Options
 
         # Configure Edge options
         edge_options = Options()
-        edge_options.add_argument("--headless")  # Run in headless mode (no browser window)
+        edge_options.add_argument("--headless=new")
+        edge_options.add_argument("--disable-blink-features=AutomationControlled")
         edge_options.add_argument("--no-sandbox")
         edge_options.add_argument("--disable-dev-shm-usage")
         edge_options.add_argument("--disable-gpu")
@@ -73,9 +73,13 @@ def init(browser_type, debug_log):
     else:
         print("Default driver settings should be set.")
         debug_log.write("Default driver settings should be set.\n")
+
+        from selenium.webdriver.chrome.options import Options
+
         # Configure Chrome options
         chrome_options = Options()
-        chrome_options.add_argument("--headless")  # Run in headless mode (no browser window)
+        chrome_options.add_argument("--headless=new")
+        chrome_options.add_argument("--disable-blink-features=AutomationControlled")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
