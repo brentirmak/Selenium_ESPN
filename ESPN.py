@@ -18,6 +18,7 @@ import argparse
 
 import ESPN_Home
 import ESPN_NBA
+import ESPN_Fantasy
 import ESPN_SetBrowser
 import ESPN_SetupLogSnapshot
 import ESPN_Parameters
@@ -81,6 +82,8 @@ with open(results_log_path, 'w') as results_log:
             ESPN_Home.init(driver, browser_type, error_snapshot_path, results_log, debug_log)
 
             ESPN_NBA.init(driver, browser_type, error_snapshot_path, results_log, debug_log)
+
+            ESPN_Fantasy.init(driver, browser_type, error_snapshot_path, results_log, debug_log)
 
             wrapper_transaction_end = time.time()
 

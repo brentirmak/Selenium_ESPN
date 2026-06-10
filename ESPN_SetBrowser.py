@@ -16,7 +16,7 @@ def init(browser_type, debug_log):
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument(
-            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36")
 
         # Initialize the driver
         driver = webdriver.Chrome(options=chrome_options)
@@ -39,7 +39,7 @@ def init(browser_type, debug_log):
         firefox_options.add_argument("--disable-gpu")
         firefox_options.add_argument("--window-size=1920,1080")
         firefox_options.add_argument(
-            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:126.0) Gecko/20100101 Firefox/126.0")
 
         # Initialize the driver
         driver = webdriver.Firefox(options=firefox_options)
@@ -61,8 +61,8 @@ def init(browser_type, debug_log):
         edge_options.add_argument("--disable-dev-shm-usage")
         edge_options.add_argument("--disable-gpu")
         edge_options.add_argument("--window-size=1920,1080")
-        #edge_options.add_argument(
-        #    "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        edge_options.add_argument(
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0")
 
         # Initialize the driver
         driver = webdriver.Edge(options=edge_options)
@@ -85,7 +85,7 @@ def init(browser_type, debug_log):
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument(
-            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36")
 
         # Initialize the driver
         driver = webdriver.Chrome(options=chrome_options)

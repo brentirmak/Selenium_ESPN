@@ -232,5 +232,6 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
 def write_failure_to_log(results_log, browser_type):
     ESPN_WriteResult.init(results_log, "ESPN_Home", "Fail", "NULL", browser_type)
     ESPN_WriteResult.init(results_log, "ESPN_NBA", "Fail", "NULL", browser_type)
+    ESPN_WriteResult.init(results_log, "ESPN_Fantasy", "Fail", "NULL", browser_type)
     ESPN_WriteResult.init(results_log, "ESPN_Wrapper", "Fail", "NULL", browser_type)
     ESPN_WriteResult.init(results_log, "ESPN_Heartbeat", "Fail", "NULL", browser_type)
