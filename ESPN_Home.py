@@ -10,8 +10,13 @@ import sys
 
 import ESPN_Parameters
 import ESPN_WriteResult
+import ESPN_Alert
 
 test_url = ESPN_Parameters.espn_test_parameters['TEST_URL']
+
+#Alert Information
+error_name = "ESPN Home"
+error_detail = "ESPN Home transaction failed - look at the screenshot for the failure condition"
 
 def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
 
@@ -176,6 +181,15 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
 
             write_failure_to_log(results_log, browser_type)
 
+            try:
+                debug_log.write("Sending out alerts...\n")
+                print("Sending out alerts...")
+
+                ESPN_Alert.init(error_name, home_error_snapshot, error_detail)
+            except:
+                debug_log.write("Could not send out the alerts...\n")
+                print("Could not send out the alerts...")
+
             driver.close()
             time.sleep(1)
             driver.quit()
@@ -218,6 +232,15 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
         print("\nCaptured Error Screenshot: ", home_error_snapshot)
 
         write_failure_to_log(results_log, browser_type)
+
+        try:
+            debug_log.write("Sending out alerts...\n")
+            print("Sending out alerts...")
+
+            ESPN_Alert.init(error_name, home_error_snapshot, error_detail)
+        except:
+            debug_log.write("Could not send out the alerts...\n")
+            print("Could not send out the alerts...")
 
         driver.close()
         time.sleep(1)

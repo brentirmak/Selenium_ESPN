@@ -6,6 +6,11 @@ import time
 import sys
 
 import ESPN_WriteResult
+import ESPN_Alert
+
+#Alert Information
+error_name = "ESPN Fantasy"
+error_detail = "ESPN Fantasy transaction failed - look at the screenshot for the failure condition"
 
 def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
     try:
@@ -86,6 +91,15 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
         print("\nCaptured Error Screenshot: ", fantasy_error_snapshot)
 
         write_failure_to_log(results_log, browser_type)
+
+        try:
+            debug_log.write("Sending out alerts...\n")
+            print("Sending out alerts...")
+
+            ESPN_Alert.init(error_name, fantasy_error_snapshot, error_detail)
+        except:
+            debug_log.write("Could not send out the alerts...\n")
+            print("Could not send out the alerts...")
 
         driver.close()
         time.sleep(1)

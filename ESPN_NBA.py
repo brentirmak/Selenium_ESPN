@@ -6,6 +6,11 @@ import time
 import sys
 
 import ESPN_WriteResult
+import ESPN_Alert
+
+#Alert Information
+error_name = "ESPN NBA"
+error_detail = "ESPN NBA transaction failed - look at the screenshot for the failure condition"
 
 def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
     try:
@@ -93,14 +98,23 @@ def init(driver, browser_type, error_snapshot_path, results_log, debug_log):
         debug_log.write("Capturing screenshot\n")
 
         # Example: Take a screenshot
-        home_error_snapshot = error_snapshot_path + "_NBA.png"
-        driver.save_screenshot(home_error_snapshot)
+        nba_error_snapshot = error_snapshot_path + "_NBA.png"
+        driver.save_screenshot(nba_error_snapshot)
         debug_log.write("Captured Error Screenshot: ")
-        debug_log.write(home_error_snapshot)
+        debug_log.write(nba_error_snapshot)
         debug_log.write("\n")
-        print("\nCaptured Error Screenshot: ", home_error_snapshot)
+        print("\nCaptured Error Screenshot: ", nba_error_snapshot)
 
         write_failure_to_log(results_log, browser_type)
+
+        try:
+            debug_log.write("Sending out alerts...\n")
+            print("Sending out alerts...")
+
+            ESPN_Alert.init(error_name, nba_error_snapshot, error_detail)
+        except:
+            debug_log.write("Could not send out the alerts...\n")
+            print("Could not send out the alerts...")
 
         driver.close()
         time.sleep(1)
