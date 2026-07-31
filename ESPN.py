@@ -41,13 +41,10 @@ if "var/lib/jenkins/workspace" in os.getcwd():
     results_log_path = os.getcwd() + "/" + test_name + ".txt"
     run_type = "jenkins"
     print("Path for results file has been set, run type set to jenkins")
-<<<<<<< HEAD
 elif "/Users/seiwa/" in os.getcwd():
     print("We are running script from iOS - path needs to be changed")
     results_log_path = "/Users/seiwa/SeleniumProjects/Selenium_ESPN" + "/" + test_name + ".txt"
     print("Path for results file has been set, run type set to manual")
-=======
->>>>>>> origin/master
 else:
     print("We are running script from development VM")
     results_log_path = test_folder_path + "/" + test_name + "/" + test_name + ".txt"

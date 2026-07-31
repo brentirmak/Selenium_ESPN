@@ -27,12 +27,9 @@ if "var/lib/jenkins/workspace" in os.getcwd():
     print("Running from Jenkins")
     results_log = os.getcwd() + "/" + espn_results_file
     run_type = "jenkins"
-<<<<<<< HEAD
 elif "/Users/seiwa/" in os.getcwd():
     print("We are running script from iOS")
     results_log = "/Users/seiwa/SeleniumProjects/Selenium_ESPN" + "/" + espn_results_file
-=======
->>>>>>> origin/master
 else:
     print("Running from dev VM")
     results_log = test_folder_path + "/" + test_name + "/" + espn_results_file

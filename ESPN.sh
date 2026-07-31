@@ -33,6 +33,7 @@ echo "Results have been stored - will remove txt results file"
 rm Selenium_ESPN.txt
 
 sleep 5
+
 echo "Running the script for the Edge driver/browser"
 python3 ESPN.py --browser Edge
 set -e
@@ -42,17 +43,19 @@ set +e
 echo "Results have been stored - will remove txt results file"
 rm Selenium_ESPN.txt
 
-<<<<<<< HEAD
 sleep 5
-echo "Running the script for the Edge driver/browser"
-python3 ESPN.py --browser Safari
-set -e
-echo "Storing the results for the Edge driver/browser script run"
-python3 ESPN_StoreDB.py
-set +e
-echo "Results have been stored - will remove txt results file"
-rm Selenium_ESPN.txt
 
-=======
->>>>>>> origin/master
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  echo "Running the script for the Safari driver/browser"
+  python3 ESPN.py --browser Safari
+  set -e
+  echo "Storing the results for the Safari driver/browser script run"
+  python3 ESPN_StoreDB.py
+  set +e
+  echo "Results have been stored - will remove txt results file"
+  rm Selenium_ESPN.txt
+else
+  echo "Skipping Safari driver/browser script - not running on macOS"
+fi
+
 exit
