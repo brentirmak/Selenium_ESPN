@@ -70,6 +70,7 @@ def init(browser_type, debug_log):
         debug_log.write("Driver settings for Edge have been set.\n")
 
         return driver
+<<<<<<< HEAD
     elif "Safari" in browser_type:
         print("Driver settings for Edge should be set.")
         debug_log.write("Driver settings for Safari should be set.\n")
@@ -93,6 +94,8 @@ def init(browser_type, debug_log):
         debug_log.write("Driver settings for Safari have been set.\n")
     
         return driver
+=======
+>>>>>>> origin/master
     else:
         print("Default driver settings should be set.")
         debug_log.write("Default driver settings should be set.\n")

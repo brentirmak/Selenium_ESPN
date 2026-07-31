@@ -42,6 +42,7 @@ set +e
 echo "Results have been stored - will remove txt results file"
 rm Selenium_ESPN.txt
 
+<<<<<<< HEAD
 sleep 5
 echo "Running the script for the Edge driver/browser"
 python3 ESPN.py --browser Safari
@@ -52,4 +53,6 @@ set +e
 echo "Results have been stored - will remove txt results file"
 rm Selenium_ESPN.txt
 
+=======
+>>>>>>> origin/master
 exit
