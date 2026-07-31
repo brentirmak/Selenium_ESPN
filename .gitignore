@@ -1,0 +1,8 @@
+.env
+.env.local
+.env.production
+Debug/
+Error_Snapshots/
+__pycache__/
+.idea/
+.venv/
