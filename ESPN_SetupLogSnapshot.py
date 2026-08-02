@@ -20,6 +20,12 @@ def init():
         debug_log_path = os.getcwd() + "/" + test_name + "/Debug/"
         run_type = "jenkins"
         print("Path for error snapshots and debug logs has been set, run type set to jenkins")
+    elif "/Users/Shared/Jenkins/workspace" in os.getcwd():
+        print("Running from Jenkins - MacOS - path needs to be changed")
+        error_snapshot_path = os.getcwd() + "/" + test_name + "/Error_Snapshots/"
+        debug_log_path = os.getcwd() + "/" + test_name + "/Debug/"
+        run_type = "jenkins"
+        print("Path for error snapshots and debug logs has been set, run type set to jenkins")
     elif "/Users/seiwa/" in os.getcwd():
         print("We are running script from iOS - path needs to be changed")
         error_snapshot_path = "/Users/seiwa/SeleniumProjects/Selenium_ESPN/Error_Snapshots/"
