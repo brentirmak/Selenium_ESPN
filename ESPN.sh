@@ -1,3 +1,4 @@
+```bash
 #!/bin/bash
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -9,9 +10,17 @@ echo "Called from: $CALLED_FROM"
 PYTHON_EXECUTABLE="${PYTHON_EXECUTABLE:-python3}"
 echo "Python executable: $PYTHON_EXECUTABLE"
 
-# Track whether any browser failed.
-OVERALL_STATUS=0
+# Optional browser argument.
+#
+# Examples:
+#   ./ESPN.sh
+#   ./ESPN.sh Safari
+#
+# If a browser is supplied, only that browser is executed.
+# If no browser is supplied, Chrome, Firefox and Edge are executed.
+REQUESTED_BROWSER="${1:-}"
 
+OVERALL_STATUS=0
 
 run_browser_test() {
     local browser="$1"
@@ -21,9 +30,6 @@ run_browser_test() {
     echo "Starting ${browser} browser test"
     echo "============================================================"
 
-    # ---------------------------------------------------------
-    # Run the Selenium test
-    # ---------------------------------------------------------
     echo "Running the script for the ${browser} driver/browser"
 
     if "$PYTHON_EXECUTABLE" ESPN.py --browser "$browser"; then
@@ -33,15 +39,6 @@ run_browser_test() {
         OVERALL_STATUS=1
     fi
 
-
-    # ---------------------------------------------------------
-    # Store the results in MySQL
-    # ---------------------------------------------------------
-    #
-    # Run this independently even if ESPN.py failed.
-    # This allows ESPN_StoreDB.py to store whatever results
-    # were successfully written before the failure.
-    #
     echo ""
     echo "Storing the results for the ${browser} driver/browser script run"
 
@@ -52,19 +49,10 @@ run_browser_test() {
         OVERALL_STATUS=1
     fi
 
-
-    # ---------------------------------------------------------
-    # Remove local results file
-    # ---------------------------------------------------------
     echo ""
     echo "Results have been stored - removing txt results file"
-
     rm -f Selenium_ESPN.txt
 
-
-    # ---------------------------------------------------------
-    # Small delay before starting the next browser
-    # ---------------------------------------------------------
     sleep 5
 
     echo ""
@@ -73,49 +61,57 @@ run_browser_test() {
 }
 
 
-# =============================================================
-# Chrome
-# =============================================================
-run_browser_test "Chrome"
+# ============================================================
+# Requested single-browser execution
+# ============================================================
 
+if [[ -n "$REQUESTED_BROWSER" ]]; then
 
-# =============================================================
-# Firefox
-# =============================================================
-run_browser_test "Firefox"
-
-
-# =============================================================
-# Edge
-# =============================================================
-run_browser_test "Edge"
-
-
-# =============================================================
-# Safari
-# =============================================================
-if [[ "$(uname -s)" == "Darwin" ]]; then
-    run_browser_test "Safari"
-else
     echo ""
-    echo "Skipping Safari driver/browser script - not running on macOS"
+    echo "Single browser execution requested: $REQUESTED_BROWSER"
+
+    case "$REQUESTED_BROWSER" in
+        Chrome|Firefox|Edge|Safari)
+            run_browser_test "$REQUESTED_BROWSER"
+            ;;
+        *)
+            echo "[ERROR] Unsupported browser: $REQUESTED_BROWSER"
+            echo "Supported browsers: Chrome, Firefox, Edge, Safari"
+            exit 1
+            ;;
+    esac
+
+else
+
+    # ========================================================
+    # Default execution
+    #
+    # Ubuntu/Linux:
+    #   Chrome
+    #   Firefox
+    #   Edge
+    #
+    # Safari is handled by the separate macOS Jenkins job.
+    # ========================================================
+
+    run_browser_test "Chrome"
+    run_browser_test "Firefox"
+    run_browser_test "Edge"
+
 fi
 
-
-# =============================================================
-# Final Jenkins status
-# =============================================================
 
 echo ""
 echo "============================================================"
 
 if [[ "$OVERALL_STATUS" -eq 0 ]]; then
-    echo "ALL BROWSER TESTS COMPLETED SUCCESSFULLY"
+    echo "ALL REQUESTED BROWSER TESTS COMPLETED SUCCESSFULLY"
 else
-    echo "ONE OR MORE BROWSER TESTS FAILED"
+    echo "ONE OR MORE REQUESTED BROWSER TESTS FAILED"
     echo "Review the Jenkins console output for the failed browser(s)."
 fi
 
 echo "============================================================"
 
 exit "$OVERALL_STATUS"
+```
