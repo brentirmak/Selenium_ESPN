@@ -1,11 +1,11 @@
 import os
 import sys
 import mysql.connector
-import pytz
 from datetime import datetime
-
+import pytz
 import ESPN_Parameters
-from dotenv import load_dotenv
+
+from dotenv import load_dotenv, dotenv_values
 
 
 # ============================================================
@@ -17,50 +17,78 @@ test_folder_path = ESPN_Parameters.espn_test_parameters['TEST_FOLDER_PATH']
 test_name = ESPN_Parameters.espn_test_parameters['TEST_NAME']
 
 run_type = "manual"
+
 errors = []
 
-cnx = None
-cursor = None
+
+# ============================================================
+# Load MySQL Environment
+# ============================================================
+
+def load_mysql_environment():
+    """
+    Load MySQL configuration.
+
+    Jenkins:
+        Read the Jenkins Secret File specified by ENV_FILE
+        using python-dotenv.
+
+    Local execution:
+        Read the local .env file.
+    """
+
+    env_file = os.getenv("ENV_FILE")
+
+    if env_file:
+
+        print("Using Jenkins Secret File specified by ENV_FILE")
+
+        if not os.path.isfile(env_file):
+            print(f"ERROR: ENV_FILE does not exist: {env_file}")
+            sys.exit(1)
+
+        # Read the Secret File directly.
+        # Do NOT use shell sourcing.
+        env = dotenv_values(env_file)
+
+        mysql_url = env.get("MYSQL_URL")
+        mysql_username = env.get("MYSQL_USERNAME")
+        mysql_password = env.get("MYSQL_PASSWORD")
+
+    else:
+
+        print("Using local .env file")
+
+        load_dotenv()
+
+        mysql_url = os.getenv("MYSQL_URL")
+        mysql_username = os.getenv("MYSQL_USERNAME")
+        mysql_password = os.getenv("MYSQL_PASSWORD")
+
+    return mysql_url, mysql_username, mysql_password
 
 
 # ============================================================
-# Load environment variables
-# ============================================================
-#
-# Jenkins provides the variables from the Secret File bound to
-# ENV_FILE.  In Jenkins, do NOT allow a local .env file to
-# override those values.
-#
-# For local development, if ENV_FILE is not set, load .env.
+# Load MySQL Configuration
 # ============================================================
 
-if os.getenv("ENV_FILE"):
-    print("Using environment variables provided by Jenkins ENV_FILE")
-else:
-    print("ENV_FILE is not set - loading local .env file")
-    load_dotenv()
+mysql_url, mysql_username, mysql_password = load_mysql_environment()
 
-
-# Retrieve MySQL configuration
-mysql_url = os.getenv("MYSQL_URL")
-mysql_username = os.getenv("MYSQL_USERNAME")
-mysql_password = os.getenv("MYSQL_PASSWORD")
-
-
-# ============================================================
-# Validate MySQL configuration
-# ============================================================
 
 print("")
 print("MySQL configuration:")
 print(f"  MYSQL_URL      : {mysql_url}")
 print(f"  MYSQL_USERNAME : {mysql_username}")
-print(
-    f"  MYSQL_PASSWORD : "
-    f"{'********' if mysql_password else 'NOT SET'}"
-)
-print("")
 
+if mysql_password:
+    print(f"  MYSQL_PASSWORD : SET ({len(mysql_password)} characters)")
+else:
+    print("  MYSQL_PASSWORD : NOT SET")
+
+
+# ============================================================
+# Validate MySQL Configuration
+# ============================================================
 
 missing_variables = []
 
@@ -73,74 +101,193 @@ if not mysql_username:
 if not mysql_password:
     missing_variables.append("MYSQL_PASSWORD")
 
+
 if missing_variables:
+
     print(
         "ERROR: Missing required MySQL environment variable(s): "
         + ", ".join(missing_variables)
     )
+
     sys.exit(1)
 
 
 # ============================================================
-# Determine results log location
+# Determine Run Type / Paths
 # ============================================================
 
-current_directory = os.getcwd()
+current_path = os.getcwd()
 
-if "var/lib/jenkins/workspace" in current_directory:
-    print("Running from Jenkins")
-    results_log = os.path.join(current_directory, espn_results_file)
+
+if "var/lib/jenkins/workspace" in current_path:
+
+    print(
+        "We are running script from Jenkins server - "
+        "path needs to be changed"
+    )
+
+    test_folder_path = current_path
     run_type = "jenkins"
 
-elif "/Users/Shared/Jenkins/workspace" in current_directory:
-    print("Running from Jenkins - MacOS")
-    results_log = os.path.join(current_directory, espn_results_file)
+elif "/Users/Shared/Jenkins/workspace" in current_path:
+
+    print(
+        "We are running script from Mac Jenkins server - "
+        "path needs to be changed"
+    )
+
+    test_folder_path = current_path
     run_type = "jenkins"
 
-elif "/Users/seiwa/" in current_directory:
-    print("We are running script from iOS")
-    results_log = os.path.join(
-        "/Users/seiwa/SeleniumProjects/Selenium_ESPN",
-        espn_results_file
+elif "/Users/seiwa/" in current_path:
+
+    run_type = "manual"
+
+else:
+
+    run_type = "manual"
+
+
+# ============================================================
+# Results File
+# ============================================================
+
+if run_type == "jenkins":
+
+    espn_results_file = os.path.join(
+        current_path,
+        "Selenium_ESPN.txt"
     )
 
 else:
-    print("Running from dev VM")
-    results_log = os.path.join(
+
+    espn_results_file = os.path.join(
         test_folder_path,
-        test_name,
-        espn_results_file
+        "Selenium_ESPN.txt"
     )
 
 
-print("Results log:", results_log)
+print(f"Results file: {espn_results_file}")
+print(f"Run type: {run_type}")
 
 
 # ============================================================
-# Validate results file
+# Read Test Results
 # ============================================================
 
-if not os.path.exists(results_log):
-    print(f"ERROR: Results file not found: {results_log}")
+if not os.path.exists(espn_results_file):
+
+    print(
+        f"ERROR: Results file was not found: "
+        f"{espn_results_file}"
+    )
+
+    sys.exit(1)
+
+
+try:
+
+    with open(
+        espn_results_file,
+        "r",
+        encoding="utf-8"
+    ) as file:
+
+        results = file.readlines()
+
+except Exception as e:
+
+    print(f"ERROR: Unable to read results file: {e}")
+
     sys.exit(1)
 
 
 # ============================================================
-# Database connection
+# Parse Results
 # ============================================================
 
-def connect_to_db(config):
-    try:
-        return mysql.connector.connect(**config)
+home_duration = None
+nba_duration = None
+fantasy_duration = None
+browser = None
 
-    except mysql.connector.Error as e:
-        print(f"DB connection failed: {e}")
-        return None
 
-    except Exception as e:
-        print(f"Unexpected DB connection error: {e}")
-        return None
+for line in results:
 
+    line = line.strip()
+
+    # --------------------------------------------------------
+    # Browser
+    # --------------------------------------------------------
+
+    if line.startswith("Browser Type:"):
+
+        browser = line.split(":", 1)[1].strip()
+
+    # --------------------------------------------------------
+    # Home
+    # --------------------------------------------------------
+
+    elif line.startswith("Home Transaction Duration:"):
+
+        try:
+
+            home_duration = float(
+                line.split(":", 1)[1].strip()
+            )
+
+        except ValueError:
+
+            pass
+
+    # --------------------------------------------------------
+    # NBA
+    # --------------------------------------------------------
+
+    elif line.startswith("NBA Transaction Duration:"):
+
+        try:
+
+            nba_duration = float(
+                line.split(":", 1)[1].strip()
+            )
+
+        except ValueError:
+
+            pass
+
+    # --------------------------------------------------------
+    # Fantasy
+    # --------------------------------------------------------
+
+    elif line.startswith("Fantasy Transaction Duration:"):
+
+        try:
+
+            fantasy_duration = float(
+                line.split(":", 1)[1].strip()
+            )
+
+        except ValueError:
+
+            pass
+
+
+# ============================================================
+# Display Parsed Results
+# ============================================================
+
+print("")
+print("Parsed Selenium results:")
+print(f"  Browser : {browser}")
+print(f"  Home    : {home_duration}")
+print(f"  NBA     : {nba_duration}")
+print(f"  Fantasy : {fantasy_duration}")
+
+
+# ============================================================
+# MySQL Configuration
+# ============================================================
 
 config = {
     "user": mysql_username,
@@ -150,164 +297,157 @@ config = {
 }
 
 
-print("Connecting to DB...")
+# ============================================================
+# Connect To MySQL
+# ============================================================
 
-cnx = connect_to_db(config)
+cnx = None
+cursor = None
 
-if cnx is None:
-    print("ERROR: Unable to connect to MySQL.")
-    print(f"Host used: {mysql_url}")
-    print(f"Username used: {mysql_username}")
+
+try:
+
+    print("")
+    print("Connecting to MySQL...")
+    print(f"Host: {mysql_url}")
+    print(f"User: {mysql_username}")
+
+    cnx = mysql.connector.connect(
+        **config
+    )
+
+    print("MySQL connection successful.")
+
+    cursor = cnx.cursor()
+
+
+except mysql.connector.Error as err:
+
+    print(
+        f"MySQL connection failed: "
+        f"{err}"
+    )
+
     sys.exit(1)
 
 
-cursor = cnx.cursor()
-
-
 # ============================================================
-# Main logic
+# Timestamp
 # ============================================================
 
 try:
 
-    current_timestamp = datetime.now(
-        pytz.timezone("America/Los_Angeles")
+    pacific = pytz.timezone(
+        "America/Los_Angeles"
     )
 
-    print("Current time:", current_timestamp)
+    run_timestamp = datetime.now(
+        pacific
+    ).strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
 
-    with open(results_log, "r") as text_file:
-        lines = text_file.readlines()
+except Exception:
 
-
-    # Default values
-    ESPN_Home_trx_time = "NULL"
-    ESPN_NBA_trx_time = "NULL"
-    ESPN_Fantasy_trx_time = "NULL"
-
-    browser_type = "Unknown"
-
-
-    # ========================================================
-    # Parse results file
-    # ========================================================
-
-    for line in lines:
-
-        line = line.strip()
-
-        if not line:
-            continue
-
-        try:
-            trx_name, trx_status, trx_duration, browser_type = (
-                line.split(",")
-            )
-
-        except ValueError:
-            print(f"WARNING: Unable to parse results line: {line}")
-            continue
+    run_timestamp = datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
 
 
-        if trx_name == "ESPN_Home":
+# ============================================================
+# Insert Results
+# ============================================================
 
-            ESPN_Home_trx_time = trx_duration[:5]
-            ESPN_Home_trx_status = trx_status
-
-
-        elif trx_name == "ESPN_NBA":
-
-            ESPN_NBA_trx_time = trx_duration[:5]
-            ESPN_NBA_trx_status = trx_status
-
-
-        elif trx_name == "ESPN_Fantasy":
-
-            ESPN_Fantasy_trx_time = trx_duration[:5]
-            ESPN_Fantasy_trx_status = trx_status
-
-
-        elif trx_name == "ESPN_Wrapper":
-
-            ESPN_Wrapper_trx_status = trx_status
-
-            ESPN_Wrapper_trx_time = (
-                "NULL"
-                if ESPN_Wrapper_trx_status in ("Fail", "Stop")
-                else trx_duration[:5]
-            )
+insert_query = """
+    INSERT INTO selenium_espn
+    (
+        RunTimeStamp,
+        RunType,
+        Home,
+        NBA,
+        Fantasy,
+        Browser
+    )
+    VALUES
+    (
+        %s,
+        %s,
+        %s,
+        %s,
+        %s,
+        %s
+    )
+"""
 
 
-        elif trx_name == "ESPN_Heartbeat":
+try:
 
-            ESPN_Heartbeat_trx_status = trx_status
-
-            ESPN_Heartbeat_trx_time = (
-                "NULL"
-                if ESPN_Heartbeat_trx_status in ("Fail", "Stop")
-                else trx_duration[:5]
-            )
-
-
-    # ========================================================
-    # Insert results
-    # ========================================================
-
-    print("Inserting results into DB...")
+    print("")
+    print("Storing Selenium results in MySQL...")
 
     cursor.execute(
-        """
-        INSERT INTO selenium_espn
+        insert_query,
         (
-            RunTimeStamp,
-            RunType,
-            Home,
-            NBA,
-            Fantasy,
-            Browser
-        )
-        VALUES (%s, %s, %s, %s, %s, %s)
-        """,
-        (
-            current_timestamp,
+            run_timestamp,
             run_type,
-            ESPN_Home_trx_time,
-            ESPN_NBA_trx_time,
-            ESPN_Fantasy_trx_time,
-            browser_type,
-        ),
+            home_duration,
+            nba_duration,
+            fantasy_duration,
+            browser,
+        )
     )
 
     cnx.commit()
 
-    print("Insert successful")
+    print("")
+    print("============================================================")
+    print(" MySQL Insert Successful")
+    print("============================================================")
+
+    print(f"RunTimeStamp : {run_timestamp}")
+    print(f"RunType      : {run_type}")
+    print(f"Browser      : {browser}")
+    print(f"Home         : {home_duration}")
+    print(f"NBA          : {nba_duration}")
+    print(f"Fantasy      : {fantasy_duration}")
+
+    print("============================================================")
 
 
-except Exception as e:
+except mysql.connector.Error as err:
 
-    print(f"ERROR: {e}")
-    errors.append(str(e))
+    print(
+        f"ERROR: Failed to insert Selenium results: "
+        f"{err}"
+    )
+
+    try:
+
+        cnx.rollback()
+
+    except Exception:
+
+        pass
+
+    sys.exit(1)
 
 
 finally:
 
     if cursor is not None:
-        cursor.close()
+
+        try:
+            cursor.close()
+        except Exception:
+            pass
 
     if cnx is not None:
-        cnx.close()
+
+        try:
+            cnx.close()
+        except Exception:
+            pass
 
 
-# ============================================================
-# Final exit
-# ============================================================
-
-if errors:
-
-    print(f"Job FAILED with errors: {errors}")
-    sys.exit(1)
-
-else:
-
-    print("Job completed successfully")
-    sys.exit(0)
+print("")
+print("ESPN results successfully stored in MySQL.")
