@@ -426,6 +426,10 @@ try:
     print(f"  Browser      : {browser}")
     print("")
 
+    home_duration = round(float(home_duration), 2)
+    nba_duration = round(float(nba_duration), 2)
+    fantasy_duration = round(float(fantasy_duration), 2)
+
     cursor.execute(
         insert_query,
         (
