@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -65,7 +64,7 @@ run_browser_test() {
 # Requested single-browser execution
 # ============================================================
 
-if [[ -n "$REQUESTED_BROWSER" ]]; then
+if [ -n "$REQUESTED_BROWSER" ]; then
 
     echo ""
     echo "Single browser execution requested: $REQUESTED_BROWSER"
@@ -104,7 +103,7 @@ fi
 echo ""
 echo "============================================================"
 
-if [[ "$OVERALL_STATUS" -eq 0 ]]; then
+if [ "$OVERALL_STATUS" -eq 0 ]; then
     echo "ALL REQUESTED BROWSER TESTS COMPLETED SUCCESSFULLY"
 else
     echo "ONE OR MORE REQUESTED BROWSER TESTS FAILED"
@@ -114,4 +113,3 @@ fi
 echo "============================================================"
 
 exit "$OVERALL_STATUS"
-```
