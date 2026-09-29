@@ -9,6 +9,79 @@ echo "Called from: $CALLED_FROM"
 PYTHON_EXECUTABLE="${PYTHON_EXECUTABLE:-python3}"
 echo "Python executable: $PYTHON_EXECUTABLE"
 
+# ------------------------------------------------------------
+# JUnit reporting
+#
+# The Jenkins wrapper script exports JUNIT_REPORT (absolute path).
+# When ESPN.sh is run by hand, fall back to ./reports/junit.xml.
+# ------------------------------------------------------------
+JUNIT_PATH="${JUNIT_REPORT:-${SCRIPT_DIR}/reports/junit.xml}"
+REPORT_DIR="$(dirname "$JUNIT_PATH")"
+mkdir -p "$REPORT_DIR"
+
+# Parallel arrays holding one entry per test case.
+T_BROWSER=()
+T_NAME=()
+T_STATUS=()
+T_TIME=()
+T_LOG=()
+
+record_result() {
+    # $1 browser, $2 test name, $3 exit code, $4 seconds, $5 log file
+    T_BROWSER+=("$1")
+    T_NAME+=("$2")
+    T_STATUS+=("$3")
+    T_TIME+=("$4")
+    T_LOG+=("$5")
+}
+
+xml_escape() {
+    # Escape XML special characters and strip control characters
+    # (keeps tab and newline).
+    sed -e 's/&/\&amp;/g' \
+        -e 's/</\&lt;/g' \
+        -e 's/>/\&gt;/g' \
+        -e 's/"/\&quot;/g' \
+    | tr -d '\000-\010\013-\037'
+}
+
+write_junit() {
+    local total="${#T_NAME[@]}"
+    local failures=0
+    local total_time=0
+    local i
+
+    for i in "${!T_NAME[@]}"; do
+        if [ "${T_STATUS[$i]}" -ne 0 ]; then
+            failures=$((failures + 1))
+        fi
+        total_time=$((total_time + T_TIME[i]))
+    done
+
+    {
+        echo '<?xml version="1.0" encoding="UTF-8"?>'
+        echo "<testsuite name=\"Selenium_ESPN\" tests=\"${total}\" failures=\"${failures}\" errors=\"0\" skipped=\"0\" time=\"${total_time}\">"
+
+        for i in "${!T_NAME[@]}"; do
+            echo "  <testcase classname=\"Selenium_ESPN.${T_BROWSER[$i]}\" name=\"${T_NAME[$i]}\" time=\"${T_TIME[$i]}\">"
+
+            if [ "${T_STATUS[$i]}" -ne 0 ]; then
+                echo "    <failure message=\"Exit code ${T_STATUS[$i]}\">"
+                if [ -f "${T_LOG[$i]}" ]; then
+                    tail -n 40 "${T_LOG[$i]}" | xml_escape
+                fi
+                echo "    </failure>"
+            fi
+
+            echo "  </testcase>"
+        done
+
+        echo "</testsuite>"
+    } > "$JUNIT_PATH"
+
+    echo "JUnit report written to: $JUNIT_PATH"
+}
+
 # Optional browser argument.
 #
 # Examples:
@@ -23,6 +96,9 @@ OVERALL_STATUS=0
 
 run_browser_test() {
     local browser="$1"
+    local start rc
+    local test_log="${REPORT_DIR}/espn_${browser}.log"
+    local store_log="${REPORT_DIR}/store_${browser}.log"
 
     echo ""
     echo "============================================================"
@@ -31,22 +107,36 @@ run_browser_test() {
 
     echo "Running the script for the ${browser} driver/browser"
 
-    if "$PYTHON_EXECUTABLE" ESPN.py --browser "$browser"; then
+    start=$SECONDS
+
+    "$PYTHON_EXECUTABLE" -u ESPN.py --browser "$browser" 2>&1 | tee "$test_log"
+    rc=${PIPESTATUS[0]}
+
+    if [ "$rc" -eq 0 ]; then
         echo "[SUCCESS] ${browser} Selenium test completed successfully."
     else
         echo "[ERROR] ${browser} Selenium test FAILED."
         OVERALL_STATUS=1
     fi
 
+    record_result "$browser" "ESPN test" "$rc" "$((SECONDS - start))" "$test_log"
+
     echo ""
     echo "Storing the results for the ${browser} driver/browser script run"
 
-    if "$PYTHON_EXECUTABLE" ESPN_StoreDB.py; then
+    start=$SECONDS
+
+    "$PYTHON_EXECUTABLE" -u ESPN_StoreDB.py 2>&1 | tee "$store_log"
+    rc=${PIPESTATUS[0]}
+
+    if [ "$rc" -eq 0 ]; then
         echo "[SUCCESS] ${browser} results stored successfully."
     else
         echo "[ERROR] ${browser} results could NOT be stored."
         OVERALL_STATUS=1
     fi
+
+    record_result "$browser" "Store results" "$rc" "$((SECONDS - start))" "$store_log"
 
     echo ""
     echo "Results have been stored - removing txt results file"
@@ -99,6 +189,8 @@ else
 
 fi
 
+
+write_junit
 
 echo ""
 echo "============================================================"
