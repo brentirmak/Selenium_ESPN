@@ -1,6 +1,7 @@
 import os
 import sys
 import csv
+import unicodedata
 import mysql.connector
 from datetime import datetime
 import pytz
@@ -16,6 +17,51 @@ test_folder_path = ESPN_Parameters.espn_test_parameters['TEST_FOLDER_PATH']
 test_name = ESPN_Parameters.espn_test_parameters['TEST_NAME']
 
 run_type = "manual"
+
+# ============================================================
+# Allowed Browser Values
+#
+# Only these four values may ever be stored in the Browser
+# column. Matching is case-insensitive and ignores hidden
+# characters; the canonical spelling below is what gets stored.
+# ============================================================
+
+ALLOWED_BROWSERS = ("Chrome", "Edge", "Firefox", "Safari")
+
+# Lower-case lookup of accepted spellings -> canonical value.
+BROWSER_LOOKUP = {name.lower(): name for name in ALLOWED_BROWSERS}
+
+# Common alternate names that map onto the four allowed values.
+BROWSER_LOOKUP.update({
+    "google chrome": "Chrome",
+    "microsoft edge": "Edge",
+    "msedge": "Edge",
+    "mozilla firefox": "Firefox",
+})
+
+
+def clean_text(value):
+    """
+    Remove control/format characters (CR, LF, tab, zero-width
+    space, BOM), convert non-breaking spaces to regular spaces,
+    and trim the result.
+    """
+    value = "".join(
+        ch for ch in value
+        if unicodedata.category(ch) not in ("Cc", "Cf")
+    )
+    return value.replace("\xa0", " ").strip()
+
+
+def normalize_browser(value):
+    """
+    Return the canonical browser name (Chrome, Edge, Firefox or
+    Safari) for the given raw value, or None if the value is not
+    one of the allowed browsers.
+    """
+    cleaned = clean_text(value)
+    return BROWSER_LOOKUP.get(cleaned.lower())
+
 
 # ============================================================
 # Load MySQL Environment
@@ -172,13 +218,15 @@ if not os.path.exists(espn_results_file):
 
 # ============================================================
 # Read Test Results
+#
+# utf-8-sig transparently removes a BOM if the file has one.
 # ============================================================
 
 try:
     with open(
         espn_results_file,
         "r",
-        encoding="utf-8",
+        encoding="utf-8-sig",
         newline=""
     ) as file:
         results = list(
@@ -209,6 +257,7 @@ home_duration = None
 nba_duration = None
 fantasy_duration = None
 browser = None
+invalid_browser_values = []
 
 print("")
 print("Reading Selenium results file...")
@@ -233,16 +282,25 @@ for row in results:
         )
         continue
 
-    transaction_name = row[0].strip()
-    transaction_status = row[1].strip()
-    transaction_time = row[2].strip()
-    transaction_browser = row[3].strip()
+    transaction_name = clean_text(row[0])
+    transaction_status = clean_text(row[1])
+    transaction_time = clean_text(row[2])
+    raw_browser = row[3]
 
     # --------------------------------------------------------
     # Browser
+    #
+    # Only Chrome, Edge, Firefox and Safari are accepted.
+    # Anything else is recorded and causes the run to fail
+    # validation below (nothing is inserted).
     # --------------------------------------------------------
-    if transaction_browser:
-        browser = transaction_browser
+    if clean_text(raw_browser):
+        normalized_browser = normalize_browser(raw_browser)
+
+        if normalized_browser is None:
+            invalid_browser_values.append(raw_browser)
+        else:
+            browser = normalized_browser
     # --------------------------------------------------------
     # Home
     # --------------------------------------------------------
@@ -299,6 +357,28 @@ print(f"Fantasy : {fantasy_duration}")
 print("============================================================")
 
 # ============================================================
+# Validate Browser
+#
+# Reject the run if any unrecognized browser value was found.
+# repr() is used so hidden characters are visible in the log.
+# ============================================================
+
+if invalid_browser_values:
+    print("")
+    print(
+        "ERROR: Unrecognized Browser value(s) in results file: "
+        + ", ".join(repr(v) for v in invalid_browser_values)
+    )
+    print(
+        "Allowed values: " + ", ".join(ALLOWED_BROWSERS)
+    )
+    print("")
+    print(
+        "The results will NOT be inserted into MySQL."
+    )
+    sys.exit(1)
+
+# ============================================================
 # Validate Parsed Results
 # ============================================================
 #
@@ -330,6 +410,14 @@ if missing_results:
         print(f"  - {value}")
     print("")
     print(
+        "The results will NOT be inserted into MySQL."
+    )
+    sys.exit(1)
+
+# Final safety net: browser must be exactly one of the four values.
+if browser not in ALLOWED_BROWSERS:
+    print(
+        f"ERROR: Browser value {browser!r} is not allowed. "
         "The results will NOT be inserted into MySQL."
     )
     sys.exit(1)
